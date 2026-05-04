@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Environment Settings
+    "module": "CommonJS", // ← changed from "nodenext"
+    "moduleResolution": "node", // ← added
+    "target": "ES2020", // ← changed from "esnext"
+
+    // Node types
+    "lib": ["ES2020"],
+    "types": ["node"], // ← changed (was empty [])
+
+    // Interop
+    "esModuleInterop": true, // ← added (fixes import express errors)
+    "allowSyntheticDefaultImports": true, // ← added
+
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Stricter Typechecking
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true // ← added (allows importing .json files)
+
+    // REMOVED these (they cause the red line errors):
+    // "jsx": "react-jsx"           ← only for React, not needed in backend
+    // "verbatimModuleSyntax": true  ← this was causing your error
+    // "noUncheckedSideEffectImports"
+    // "moduleDetection": "force"
+    // "isolatedModules": true
+    // "noUncheckedIndexedAccess"
+    // "exactOptionalPropertyTypes"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
