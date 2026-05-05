@@ -2,18 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { registerUser } from "@/services/apiAuth";
 import { registerSchema } from "@/schemas/authSchema";
 
 export default function RegisterPage() {
   const router = useRouter();
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
 
   const [errors, setErrors] = useState({
     name: "",
@@ -21,13 +16,28 @@ export default function RegisterPage() {
     password: "",
   });
 
-  const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: registerUser,
+    onSuccess: (res) => {
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      window.dispatchEvent(new Event("storage"));
+      router.push("/");
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const result = registerSchema.safeParse(form);
+    const formData = new FormData(e.currentTarget);
+
+    const data = Object.fromEntries(formData.entries()) as {
+      name: string;
+      email: string;
+      password: string;
+    };
+
+    const result = registerSchema.safeParse(data);
 
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
@@ -37,32 +47,14 @@ export default function RegisterPage() {
         email: fieldErrors.email?.[0] || "",
         password: fieldErrors.password?.[0] || "",
       });
-
       return;
     }
 
-    try {
-      setLoading(true);
-      setServerError("");
-      setErrors({ name: "", email: "", password: "" });
-
-      const res = await registerUser(result.data);
-
-      localStorage.setItem("token", res.data.token);
-
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      setServerError(
-        (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message || "Register failed",
-      );
-    } finally {
-      setLoading(false);
-    }
+    mutate(result.data);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="flex items-center justify-center min-h-[80vh]">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4"
@@ -71,41 +63,43 @@ export default function RegisterPage() {
           Register
         </h2>
 
-        {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
+        {isError && (
+          <p className="text-red-500 text-sm">
+            {(error as AxiosError<{ message: string }>)?.response?.data
+              ?.message || "An error occurred"}
+          </p>
+        )}
 
-        {/* Name */}
         <div>
           <input
+            name="name"
             type="text"
             placeholder="Name"
             className="w-full border p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700"
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           {errors.name && (
             <p className="text-red-500 text-xs mt-1">{errors.name}</p>
           )}
         </div>
 
-        {/* Email */}
         <div>
           <input
+            name="email"
             type="email"
             placeholder="Email"
             className="w-full border p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700"
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
           {errors.email && (
             <p className="text-red-500 text-xs mt-1">{errors.email}</p>
           )}
         </div>
 
-        {/* Password */}
         <div>
           <input
+            name="password"
             type="password"
             placeholder="Password"
             className="w-full border p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700"
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">{errors.password}</p>
@@ -114,10 +108,10 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition"
         >
-          {loading ? "Loading..." : "Register"}
+          {isPending ? "Loading..." : "Register"}
         </button>
 
         <p className="text-sm text-center text-gray-700">

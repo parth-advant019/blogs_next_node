@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import prisma from "../config/prisma";
 import { registerSchema, loginSchema } from "../schemas/authSchema";
 import { success, z } from "zod";
+import {
+  findUserByEmail,
+  createUser,
+} from "../services/repositories/authRepository";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -19,9 +23,7 @@ export const register = async (req: Request, res: Response) => {
 
     const { name, email, password } = result.data;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
       res.status(409).json({
@@ -33,18 +35,10 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      },
+    const user = await createUser({
+      name,
+      email,
+      password: hashedPassword,
     });
 
     const token = jwt.sign(
@@ -80,9 +74,7 @@ export const login = async (req: Request, res: Response) => {
 
     const { email, password } = result.data;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await findUserByEmail(email);
 
     if (!user) {
       res.status(401).json({
@@ -105,7 +97,7 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" },
+      { expiresIn: "1d" },
     );
 
     res.status(200).json({

@@ -20,4 +20,19 @@ model User {
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  blog Blog[]
+}
+
+model Blog {
+  id String @id @default(uuid())
+  title String
+  category String
+  content String
+
+  userId String
+  user  User  @relation(fields: [userId] ,references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
 }

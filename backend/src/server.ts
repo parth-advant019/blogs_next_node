@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import prisma from "./config/prisma";
 import authRoutes from "./routes/authRoutes";
+import blogRoutes from "./routes/blogRoutes";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/blog", blogRoutes);
 
 prisma
   .$connect()
