@@ -16,7 +16,7 @@ export const addBlog = async (req: Request, res: Response) => {
     const { title, category, content } = result.data;
 
     //get userId by JWT  by auth middleware
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({

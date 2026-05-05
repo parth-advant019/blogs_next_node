@@ -78,7 +78,7 @@ export default function SideBar() {
               <>
                 <li>
                   <Link
-                    href="/add-blogs"
+                    href="/addblogs"
                     className="flex items-center gap-3 p-4 hover:bg-indigo-500 rounded cursor-pointer"
                   >
                     <span>Add Blogs</span>
