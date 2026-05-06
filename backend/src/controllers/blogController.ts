@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import { createBlogSchema } from "../schemas/blogSchema";
-import { createBlog } from "../services/repositories/blogRepository";
+import {
+  createBlog,
+  deleteBlogById,
+  getAllBlogs,
+  getBlogById,
+  getBlogsByUserId,
+} from "../services/repositories/blogRepository";
+import { success } from "zod";
 
 export const addBlog = async (req: Request, res: Response) => {
   try {
@@ -40,6 +47,95 @@ export const addBlog = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Create blog error:", error);
 
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const fetchAllBlogs = async (req: Request, res: Response) => {
+  try {
+    const blogs = await getAllBlogs();
+    return res.status(200).json({ success: true, data: blogs });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const fetchBlogById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const blog = await getBlogById(id);
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+    return res.status(200).json({ success: true, data: blog });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const fetchMyBlogs = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const blogs = await getBlogsByUserId(userId);
+
+    return res.status(200).json({
+      success: true,
+      data: blogs,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const deleteBlog = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+
+    const userId = (req as any).user?.userId;
+
+    const blog = await getBlogById(id);
+
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    if (blog.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await deleteBlogById(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog deleted successfully",
+    });
+  } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Internal server error",

@@ -7,16 +7,19 @@ export default function SideBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
 
+  // const [isLoggedIn, setIsLoggedIn] = useState(
+  //   typeof window !== "undefined" && !!localStorage.getItem("token"),
+  // );
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-
     const handleStorage = () => {
       const token = localStorage.getItem("token");
       setIsLoggedIn(!!token);
     };
+
+    handleStorage();
 
     window.addEventListener("storage", handleStorage);
 
@@ -87,7 +90,7 @@ export default function SideBar() {
 
                 <li>
                   <Link
-                    href="/your-blogs"
+                    href="/yourblogs"
                     className="flex items-center gap-3 p-4 hover:bg-indigo-500 rounded cursor-pointer"
                   >
                     <span>Your Blogs</span>

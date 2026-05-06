@@ -24,3 +24,8 @@ export interface BlogResponse {
   message: string;
   data: Blog;
 }
+
+export interface BlogsResponse {
+  success: boolean;
+  data: Blog[];
+}

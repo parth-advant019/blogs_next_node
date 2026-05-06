@@ -1,7 +1,27 @@
 import api from "@/lib/axios";
-import { BlogInput, BlogResponse } from "@/types/blogTypes";
+import { BlogInput, BlogResponse, BlogsResponse } from "@/types/blogTypes";
 
 export const createBlog = async (data: BlogInput): Promise<BlogResponse> => {
   const response = await api.post<BlogResponse>("/blog/create", data);
+  return response.data;
+};
+
+export const getAllBlogs = async (): Promise<BlogsResponse> => {
+  const response = await api.get<BlogsResponse>("/blog/all");
+  return response.data;
+};
+export const getBlogById = async (id: string): Promise<BlogResponse> => {
+  const response = await api.get<BlogResponse>(`/blog/${id}`);
+  return response.data;
+};
+
+export const getMyBlogs = async (): Promise<BlogsResponse> => {
+  const response = await api.get<BlogsResponse>("/blog/myblogs");
+
+  return response.data;
+};
+
+export const deleteBlog = async (id: string) => {
+  const response = await api.delete(`/blog/${id}`);
   return response.data;
 };

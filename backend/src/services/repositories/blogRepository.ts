@@ -24,3 +24,61 @@ export const createBlog = async (data: {
     },
   });
 };
+
+export const getAllBlogs = async () => {
+  return prisma.blog.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+};
+
+export const getBlogById = async (id: string) => {
+  return prisma.blog.findUnique({
+    where: { id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+};
+
+export const getBlogsByUserId = async (userId: string) => {
+  return prisma.blog.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+};
+
+export const deleteBlogById = async (id: string) => {
+  return prisma.blog.delete({
+    where: {
+      id,
+    },
+  });
+};
