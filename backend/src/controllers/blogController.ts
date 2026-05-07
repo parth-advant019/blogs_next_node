@@ -6,6 +6,7 @@ import {
   getAllBlogs,
   getBlogById,
   getBlogsByUserId,
+  updateBlogById,
 } from "../services/repositories/blogRepository";
 import { success } from "zod";
 
@@ -134,6 +135,51 @@ export const deleteBlog = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       message: "Blog deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const updateBlog = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+
+    const result = createBlogSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        errors: result.error.flatten().fieldErrors,
+      });
+    }
+    const userId = (req as any).user?.userId;
+
+    const blog = await getBlogById(id);
+
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    if (blog.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const updatedBlog = await updateBlogById(id, result.data);
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog updated successfully",
+      data: updatedBlog,
     });
   } catch (error) {
     return res.status(500).json({

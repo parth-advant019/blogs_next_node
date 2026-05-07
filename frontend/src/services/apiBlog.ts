@@ -1,5 +1,6 @@
 import api from "@/lib/axios";
 import { BlogInput, BlogResponse, BlogsResponse } from "@/types/blogTypes";
+import { string } from "zod";
 
 export const createBlog = async (data: BlogInput): Promise<BlogResponse> => {
   const response = await api.post<BlogResponse>("/blog/create", data);
@@ -23,5 +24,16 @@ export const getMyBlogs = async (): Promise<BlogsResponse> => {
 
 export const deleteBlog = async (id: string) => {
   const response = await api.delete(`/blog/${id}`);
+  return response.data;
+};
+
+export const updateBlog = async ({
+  id,
+  data,
+}: {
+  id: string;
+  data: BlogInput;
+}): Promise<BlogResponse> => {
+  const response = await api.put(`/blog/${id}`, data);
   return response.data;
 };

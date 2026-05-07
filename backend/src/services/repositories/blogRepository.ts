@@ -82,3 +82,32 @@ export const deleteBlogById = async (id: string) => {
     },
   });
 };
+
+export const updateBlogById = async (
+  id: string,
+  data: {
+    title: string;
+    category: string;
+    content: string;
+  },
+) => {
+  return prisma.blog.update({
+    where: {
+      id,
+    },
+    data: {
+      title: data.title,
+      category: data.category,
+      content: data.content,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+};

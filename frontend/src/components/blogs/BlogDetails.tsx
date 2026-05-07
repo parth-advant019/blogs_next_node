@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBlogById } from "@/services/apiBlog";
 import { deleteBlog } from "@/services/apiBlog";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Props = {
   id: string;
@@ -67,12 +68,19 @@ export default function BlogDetails({ id }: Props) {
 
       <div className="text-gray-700 leading-8 mb-4">{blog.content}</div>
       {isOwner && (
-        <button
-          onClick={() => deleteMutation.mutate(blog.id)}
-          className="bg-red-400 text-white px-4 py-2 rounded mb-6"
-        >
-          {deleteMutation.isPending ? "Deleting..." : "Delete Blog"}
-        </button>
+        <div className="space-x-2">
+          <button
+            onClick={() => deleteMutation.mutate(blog.id)}
+            className="bg-blue-400 text-white px-4 py-2 rounded mb-6"
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete Blog"}
+          </button>
+          <Link href={`/editblog/${blog.id}`}>
+            <button className="bg-blue-400 text-white px-4 py-2 rounded mr-3">
+              Edit Blog
+            </button>
+          </Link>
+        </div>
       )}
     </div>
   );

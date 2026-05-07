@@ -5,6 +5,7 @@ import {
   fetchBlogById,
   fetchMyBlogs,
   deleteBlog,
+  updateBlog,
 } from "../controllers/blogController";
 import { protect } from "../middlewares/authMiddleware";
 
@@ -15,5 +16,6 @@ router.get("/all", fetchAllBlogs);
 router.get("/myblogs", protect, fetchMyBlogs);
 router.get("/:id", fetchBlogById);
 router.delete("/:id", protect, deleteBlog);
+router.put("/:id", protect, updateBlog);
 
 export default router;
