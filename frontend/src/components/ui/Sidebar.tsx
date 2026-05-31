@@ -1,37 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SideBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
-
-  // const [isLoggedIn, setIsLoggedIn] = useState(
-  //   typeof window !== "undefined" && !!localStorage.getItem("token"),
-  // );
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const handleStorage = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
-    };
-
-    handleStorage();
-
-    window.addEventListener("storage", handleStorage);
-
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
+  const { isLoggedIn, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    setIsLoggedIn(false);
-
+    logout();
     router.push("/login");
   };
 

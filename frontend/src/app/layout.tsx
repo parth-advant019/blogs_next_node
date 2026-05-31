@@ -4,6 +4,7 @@ import "./globals.css";
 import SideBar from "@/components/ui/Sidebar";
 
 import ReactQueryProvider from "@/lib/providers/ReactQueryProvider";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,12 +32,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex overflow-x-hidden bg-[#c9d6e3] transition-colors duration-300">
-        <ReactQueryProvider>
-          <SideBar />
-          <div className="w-full min-h-screen bg-[#c9d6e3] p-4 md:p-8 ml-0 md:ml-64 pt-16 md:pt-8 overflow-x-hidden">
-            {children}
-          </div>
-        </ReactQueryProvider>
+        <AuthProvider>
+          <ReactQueryProvider>
+            <SideBar />
+            <div className="w-full min-h-screen bg-[#c9d6e3] p-4 md:p-8 ml-0 md:ml-64 pt-16 md:pt-8 overflow-x-hidden">
+              {children}
+            </div>
+          </ReactQueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

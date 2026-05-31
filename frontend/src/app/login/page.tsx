@@ -7,9 +7,11 @@ import { AxiosError } from "axios";
 
 import { loginUser } from "@/services/apiAuth";
 import { loginSchema } from "@/schemas/authSchema";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [errors, setErrors] = useState({
     email: "",
@@ -20,9 +22,7 @@ export default function LoginPage() {
     mutationFn: loginUser,
 
     onSuccess: (res) => {
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      window.dispatchEvent(new Event("storage"));
+      login(res.data.token, res.data.user);
 
       router.push("/");
     },
