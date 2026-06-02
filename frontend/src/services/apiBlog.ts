@@ -2,8 +2,12 @@ import api from "@/lib/axios";
 import { BlogInput, BlogResponse, BlogsResponse } from "@/types/blogTypes";
 import { string } from "zod";
 
-export const createBlog = async (data: BlogInput): Promise<BlogResponse> => {
-  const response = await api.post<BlogResponse>("/blog/create", data);
+export const createBlog = async (formData: FormData): Promise<BlogResponse> => {
+  const response = await api.post<BlogResponse>("/blog/create", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 

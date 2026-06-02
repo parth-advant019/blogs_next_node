@@ -9,6 +9,7 @@ export interface Blog {
   title: string;
   category: string;
   content: string;
+  thumbnailUrl: string | null;
   userId: string;
   createdAt: string;
   updatedAt: string;

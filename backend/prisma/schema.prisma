@@ -28,6 +28,7 @@ model Blog {
   title String
   category String
   content String
+  thumbnailUrl String?
 
   userId String
   user  User  @relation(fields: [userId] ,references: [id])

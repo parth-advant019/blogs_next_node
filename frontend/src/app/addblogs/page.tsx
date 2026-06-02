@@ -25,18 +25,16 @@ export default function AddBlogPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-
-    const data = Object.fromEntries(formData.entries()) as {
+    const form = e.currentTarget;
+    const rawData = Object.fromEntries(new FormData(form).entries()) as {
       title: string;
       category: string;
       content: string;
     };
-    const result = createBlogSchema.safeParse(data);
 
+    const result = createBlogSchema.safeParse(rawData);
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
-
       setErrors({
         title: fieldErrors.title?.[0] || "",
         category: fieldErrors.category?.[0] || "",
@@ -44,7 +42,10 @@ export default function AddBlogPage() {
       });
       return;
     }
-    mutate(result.data);
+
+    const formData = new FormData(form);
+
+    mutate(formData);
   };
 
   return (
@@ -98,6 +99,19 @@ export default function AddBlogPage() {
         {errors.content && (
           <p className="text-red-500 text-xs mt-1">{errors.content}</p>
         )}
+
+        {/* Simple file upload */}
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Thumbnail <span className="text-gray-400">(optional)</span>
+          </label>
+          <input
+            type="file"
+            name="thumbnail"
+            accept="image/*"
+            className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+        </div>
 
         <button
           type="submit"

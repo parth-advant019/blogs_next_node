@@ -6,6 +6,7 @@ import { getBlogById } from "@/services/apiBlog";
 import { deleteBlog } from "@/services/apiBlog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   id: string;
@@ -65,6 +66,16 @@ export default function BlogDetails({ id }: Props) {
       <h1 className="text-4xl font-bold text-gray-800 mb-4">{blog.title}</h1>
 
       <p className="text-gray-500 mb-8">By {blog.user.name}</p>
+
+      {blog.thumbnailUrl && (
+        <Image
+          src={blog.thumbnailUrl}
+          alt={blog.title}
+          width={1200}
+          height={500}
+          className="w-full h-96 object-cover rounded-lg mb-6"
+        />
+      )}
 
       <div className="text-gray-700 leading-8 mb-4">{blog.content}</div>
       {isOwner && (

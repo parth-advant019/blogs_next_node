@@ -5,6 +5,7 @@ export const createBlog = async (data: {
   category: string;
   content: string;
   userId: string;
+  thumbnailUrl?: string;
 }) => {
   return prisma.blog.create({
     data: {
@@ -12,6 +13,7 @@ export const createBlog = async (data: {
       category: data.category,
       content: data.content,
       userId: data.userId,
+      thumbnailUrl: data.thumbnailUrl ?? null,
     },
     include: {
       user: {

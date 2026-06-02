@@ -8,6 +8,7 @@ import {
   getBlogsByUserId,
   updateBlogById,
 } from "../services/repositories/blogRepository";
+import { supabase } from "../config/supabase";
 import { success } from "zod";
 
 export const addBlog = async (req: Request, res: Response) => {
@@ -33,11 +34,43 @@ export const addBlog = async (req: Request, res: Response) => {
       });
     }
 
+    // file uploads start .........
+    let thumbnailUrl: string | undefined;
+
+    if (req.file) {
+      const file = req.file;
+      const fileExt = file.originalname.split(".").pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+      const { error } = await supabase.storage
+        .from("blog-thumbnails")
+        .upload(fileName, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Image upload failed",
+        });
+      }
+
+      const { data } = supabase.storage
+        .from("blog-thumbnails")
+        .getPublicUrl(fileName);
+
+      thumbnailUrl = data.publicUrl;
+    }
+
+    // file uploads end   .........
+
     const blog = await createBlog({
       title,
       category,
       content,
       userId,
+      thumbnailUrl,
     });
 
     return res.status(201).json({
