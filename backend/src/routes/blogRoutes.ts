@@ -17,6 +17,6 @@ router.get("/all", fetchAllBlogs);
 router.get("/myblogs", protect, fetchMyBlogs);
 router.get("/:id", fetchBlogById);
 router.delete("/:id", protect, deleteBlog);
-router.put("/:id", protect, updateBlog);
+router.put("/:id", protect, upload.single("thumbnail"), updateBlog);
 
 export default router;

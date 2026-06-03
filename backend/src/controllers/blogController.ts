@@ -163,6 +163,15 @@ export const deleteBlog = async (req: Request, res: Response) => {
       });
     }
 
+    if (blog.thumbnailUrl) {
+      const urlParts = blog.thumbnailUrl.split("/blog-thumbnails/");
+      const filePath = urlParts[1]; // → "userId/timestamp.png"
+
+      if (filePath) {
+        await supabase.storage.from("blog-thumbnails").remove([filePath]);
+      }
+    }
+
     await deleteBlogById(id);
 
     return res.status(200).json({
@@ -207,8 +216,49 @@ export const updateBlog = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedBlog = await updateBlogById(id, result.data);
+    //file upload start ....
+    let thumbnailUrl: string | undefined = undefined;
 
+    if (req.file) {
+      if (blog.thumbnailUrl) {
+        const urlParts = blog.thumbnailUrl.split("/blog-thumbnails/");
+        const oldFilePath = urlParts[1];
+
+        if (oldFilePath) {
+          await supabase.storage.from("blog-thumbnails").remove([oldFilePath]);
+        }
+      }
+
+      // user upload image
+      const file = req.file;
+      const fileExt = file.originalname.split(".").pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+      const { error } = await supabase.storage
+        .from("blog-thumbnails")
+        .upload(fileName, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Image upload failed" });
+      }
+
+      const { data } = supabase.storage
+        .from("blog-thumbnails")
+        .getPublicUrl(fileName);
+
+      thumbnailUrl = data.publicUrl;
+
+      //file upload end ....
+    }
+    const updatedBlog = await updateBlogById(id, {
+      ...result.data,
+      thumbnailUrl,
+    });
     return res.status(200).json({
       success: true,
       message: "Blog updated successfully",

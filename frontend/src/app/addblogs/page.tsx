@@ -100,7 +100,6 @@ export default function AddBlogPage() {
           <p className="text-red-500 text-xs mt-1">{errors.content}</p>
         )}
 
-        {/* Simple file upload */}
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700">
             Thumbnail <span className="text-gray-400">(optional)</span>

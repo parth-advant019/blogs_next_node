@@ -11,6 +11,7 @@ import { AxiosError } from "axios";
 import { getBlogById, updateBlog } from "@/services/apiBlog";
 
 import { createBlogSchema } from "@/schemas/blogSchema";
+import Image from "next/image";
 
 type Props = {
   params: {
@@ -63,15 +64,14 @@ export default function EditBlogPage({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-
-    const data = Object.fromEntries(formData.entries()) as {
+    const form = e.currentTarget;
+    const rawData = Object.fromEntries(new FormData(form).entries()) as {
       title: string;
       category: string;
       content: string;
     };
 
-    const result = createBlogSchema.safeParse(data);
+    const result = createBlogSchema.safeParse(rawData);
 
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
@@ -87,7 +87,7 @@ export default function EditBlogPage({
 
     mutate({
       id: id,
-      data: result.data,
+      data: new FormData(form),
     });
   };
 
@@ -163,6 +163,30 @@ export default function EditBlogPage({
         {errors.content && (
           <p className="text-red-500 text-xs mt-1">{errors.content}</p>
         )}
+
+        {blog.thumbnailUrl && (
+          <div className="w-full h-40 relative mb-6">
+            <p className="text-sm text-gray-500">Current thumbnail:</p>
+            <Image
+              src={blog.thumbnailUrl}
+              alt="Current thumbnail"
+              fill
+              className="object-contain rounded-lg"
+            />
+          </div>
+        )}
+
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Thumbnail <span className="text-gray-400">(optional)</span>
+          </label>
+          <input
+            type="file"
+            name="thumbnail"
+            accept="image/*"
+            className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+        </div>
 
         <button
           type="submit"

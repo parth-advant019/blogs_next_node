@@ -5,14 +5,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBlogById } from "@/services/apiBlog";
 import { deleteBlog } from "@/services/apiBlog";
 import { useRouter } from "next/navigation";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = {
   id: string;
 };
 
 export default function BlogDetails({ id }: Props) {
+  // console.log("SSR: fetching blog", id);
+  // console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+
+  const { user, isReady } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -40,12 +46,11 @@ export default function BlogDetails({ id }: Props) {
 
   const blog = data.data;
 
-  const currentUser =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("user") || "null")
-      : null;
+  if (!isReady) {
+    return <p>Loading...</p>;
+  }
 
-  const isOwner = currentUser?.id === blog.user.id;
+  const isOwner = user?.id === blog.user.id;
 
   return (
     <div className="mx-auto bg-white rounded-xl shadow-md p-8">
@@ -68,15 +73,15 @@ export default function BlogDetails({ id }: Props) {
       <p className="text-gray-500 mb-8">By {blog.user.name}</p>
 
       {blog.thumbnailUrl && (
-        <Image
-          src={blog.thumbnailUrl}
-          alt={blog.title}
-          width={1200}
-          height={500}
-          className="w-full h-96 object-cover rounded-lg mb-6"
-        />
+        <div className="w-full h-72 relative mb-6">
+          <Image
+            src={blog.thumbnailUrl}
+            alt={blog.title}
+            fill
+            className="object-contain rounded-lg"
+          />
+        </div>
       )}
-
       <div className="text-gray-700 leading-8 mb-4">{blog.content}</div>
       {isOwner && (
         <div className="space-x-2">

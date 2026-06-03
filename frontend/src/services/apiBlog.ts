@@ -36,8 +36,12 @@ export const updateBlog = async ({
   data,
 }: {
   id: string;
-  data: BlogInput;
+  data: FormData;
 }): Promise<BlogResponse> => {
-  const response = await api.put(`/blog/${id}`, data);
+  const response = await api.put(`/blog/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };

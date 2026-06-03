@@ -91,6 +91,7 @@ export const updateBlogById = async (
     title: string;
     category: string;
     content: string;
+    thumbnailUrl?: string | null;
   },
 ) => {
   return prisma.blog.update({
@@ -101,6 +102,9 @@ export const updateBlogById = async (
       title: data.title,
       category: data.category,
       content: data.content,
+      ...(data.thumbnailUrl !== undefined && {
+        thumbnailUrl: data.thumbnailUrl,
+      }),
     },
     include: {
       user: {
