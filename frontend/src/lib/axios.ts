@@ -20,4 +20,19 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+//if a token expires at that time the user is  using the app so remove them 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
