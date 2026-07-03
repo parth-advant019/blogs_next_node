@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@/types/authTypes";
-import  {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
@@ -34,34 +34,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
-  const userData = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
 
-  if (token && !isTokenExpired(token)) {
-    
-    setIsLoggedIn(true);
-    if (userData) setUser(JSON.parse(userData));
-  } else {
-    
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-  }
+    if (token && !isTokenExpired(token)) {
+      setIsLoggedIn(true);
+      if (userData) setUser(JSON.parse(userData));
+    } else {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setIsLoggedIn(false);
+    }
 
-  setIsReady(true);
-  const interval = setInterval(() => {
-  console.log("checking token..."); // 👈 add this
-  const t = localStorage.getItem("token");
-  if (t && isTokenExpired(t)) {
-    console.log("token expired, logging out"); // 👈 and this
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setUser(null);
-  }
-}, 5000);
-  return () => clearInterval(interval);
-}, []);
+    setIsReady(true);
+  }, []);
 
   const login = (token: string, user: User) => {
     localStorage.setItem("token", token);
