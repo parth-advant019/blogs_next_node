@@ -7,6 +7,7 @@
     // Environment Settings
     "module": "CommonJS", // ← changed from "nodenext"
     "moduleResolution": "node", // ← added
+    "ignoreDeprecations": "6.0",
     "target": "ES2020", // ← changed from "esnext"
 
     // Node types
