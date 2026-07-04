@@ -28,7 +28,7 @@ export default async function BlogPage({ params }: Props) {
   //   const data = queryClient.getQueryData(["blog", id]);
   //   console.log("Prefetched data:", JSON.stringify(data)); // ← add this
   // } catch (err) {
-  //   console.log("Prefetch error:", err); // ← add this
+  //   console.log("Prefetch error:", err); // ← add this //
   // }
 
   await queryClient.prefetchQuery({
