@@ -8,8 +8,14 @@ import {
   getBlogsByUserId,
   updateBlogById,
 } from "../services/repositories/blogRepository";
-import { supabase } from "../config/supabase";
-import { success } from "zod";
+//import { supabase } from "../config/supabase";
+import {
+  garageClient,
+  GARAGE_BUCKET,
+  GARAGE_PUBLIC_URL,
+} from "../config/garage";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+//import { success } from "zod";
 
 export const addBlog = async (req: Request, res: Response) => {
   try {
@@ -42,25 +48,22 @@ export const addBlog = async (req: Request, res: Response) => {
       const fileExt = file.originalname.split(".").pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
-      const { error } = await supabase.storage
-        .from("blog-thumbnails")
-        .upload(fileName, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false,
-        });
-
-      if (error) {
-        return res.status(500).json({
-          success: false,
-          message: "Image upload failed",
-        });
+      try {
+        await garageClient.send(
+          new PutObjectCommand({
+            Bucket: GARAGE_BUCKET,
+            Key: fileName,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+          }),
+        );
+      } catch (error) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Image upload failed" });
       }
 
-      const { data } = supabase.storage
-        .from("blog-thumbnails")
-        .getPublicUrl(fileName);
-
-      thumbnailUrl = data.publicUrl;
+      thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
     }
 
     // file uploads end   .........
@@ -163,12 +166,25 @@ export const deleteBlog = async (req: Request, res: Response) => {
       });
     }
 
-    if (blog.thumbnailUrl) {
-      const urlParts = blog.thumbnailUrl.split("/blog-thumbnails/");
-      const filePath = urlParts[1]; // → "userId/timestamp.png"
+    // if (blog.thumbnailUrl) {
+    //   const urlParts = blog.thumbnailUrl.split("/blog-thumbnails/");
+    //   const filePath = urlParts[1]; // → "userId/timestamp.png"
 
+    //   if (filePath) {
+    //     await supabase.storage.from("blog-thumbnails").remove([filePath]);
+    //   }
+    // }
+
+    if (blog.thumbnailUrl) {
+      const filePath = blog.thumbnailUrl.replace(`${GARAGE_PUBLIC_URL}/`, "");
       if (filePath) {
-        await supabase.storage.from("blog-thumbnails").remove([filePath]);
+        try {
+          await garageClient.send(
+            new DeleteObjectCommand({ Bucket: GARAGE_BUCKET, Key: filePath }),
+          );
+        } catch (error) {
+          console.error("Failed to delete old image:", error);
+        }
       }
     }
 
@@ -219,13 +235,61 @@ export const updateBlog = async (req: Request, res: Response) => {
     //file upload start ....
     let thumbnailUrl: string | undefined = undefined;
 
+    // if (req.file) {
+    //   if (blog.thumbnailUrl) {
+    //     const urlParts = blog.thumbnailUrl.split("/blog-thumbnails/");
+    //     const oldFilePath = urlParts[1];
+
+    //     if (oldFilePath) {
+    //       await supabase.storage.from("blog-thumbnails").remove([oldFilePath]);
+    //     }
+    //   }
+
+    //   // user upload image
+    //   const file = req.file;
+    //   const fileExt = file.originalname.split(".").pop();
+    //   const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+    //   const { error } = await supabase.storage
+    //     .from("blog-thumbnails")
+    //     .upload(fileName, file.buffer, {
+    //       contentType: file.mimetype,
+    //       upsert: false,
+    //     });
+
+    //   if (error) {
+    //     return res
+    //       .status(500)
+    //       .json({ success: false, message: "Image upload failed" });
+    //   }
+
+    //   const { data } = supabase.storage
+    //     .from("blog-thumbnails")
+    //     .getPublicUrl(fileName);
+
+    //   thumbnailUrl = data.publicUrl;
+
+    //   //file upload end ....
+    // }
+
     if (req.file) {
       if (blog.thumbnailUrl) {
-        const urlParts = blog.thumbnailUrl.split("/blog-thumbnails/");
-        const oldFilePath = urlParts[1];
+        const oldFilePath = blog.thumbnailUrl.replace(
+          `${GARAGE_PUBLIC_URL}/`,
+          "",
+        );
 
         if (oldFilePath) {
-          await supabase.storage.from("blog-thumbnails").remove([oldFilePath]);
+          try {
+            await garageClient.send(
+              new DeleteObjectCommand({
+                Bucket: GARAGE_BUCKET,
+                Key: oldFilePath,
+              }),
+            );
+          } catch (error) {
+            console.error("Failed to delete old image:", error);
+          }
         }
       }
 
@@ -234,27 +298,26 @@ export const updateBlog = async (req: Request, res: Response) => {
       const fileExt = file.originalname.split(".").pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
-      const { error } = await supabase.storage
-        .from("blog-thumbnails")
-        .upload(fileName, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false,
-        });
-
-      if (error) {
+      try {
+        await garageClient.send(
+          new PutObjectCommand({
+            Bucket: GARAGE_BUCKET,
+            Key: fileName,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+          }),
+        );
+      } catch (error) {
         return res
           .status(500)
           .json({ success: false, message: "Image upload failed" });
       }
 
-      const { data } = supabase.storage
-        .from("blog-thumbnails")
-        .getPublicUrl(fileName);
-
-      thumbnailUrl = data.publicUrl;
+      thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
 
       //file upload end ....
     }
+
     const updatedBlog = await updateBlogById(id, {
       ...result.data,
       thumbnailUrl,
