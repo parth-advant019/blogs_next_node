@@ -21,7 +21,9 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 
 export const getImage = async (req: Request, res: Response) => {
   try {
-    const { key } = req.params as { key: string };
+    const key = Array.isArray(req.params.key)
+      ? req.params.key.join("/")
+      : req.params.key;
 
     const command = new GetObjectCommand({
       Bucket: GARAGE_BUCKET,
