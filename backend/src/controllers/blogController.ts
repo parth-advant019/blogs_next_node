@@ -17,6 +17,27 @@ import {
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 //import { success } from "zod";
 
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+
+export const getImage = async (req: Request, res: Response) => {
+  try {
+    const { key } = req.params as { key: string };
+
+    const command = new GetObjectCommand({
+      Bucket: GARAGE_BUCKET,
+      Key: key,
+    });
+
+    const response = await garageClient.send(command);
+
+    res.setHeader("Content-Type", response.ContentType || "image/jpeg");
+    // @ts-ignore - Body is a readable stream
+    response.Body.pipe(res);
+  } catch (error) {
+    res.status(404).json({ success: false, message: "Image not found" });
+  }
+};
+
 export const addBlog = async (req: Request, res: Response) => {
   try {
     const result = createBlogSchema.safeParse(req.body);
@@ -63,7 +84,8 @@ export const addBlog = async (req: Request, res: Response) => {
           .json({ success: false, message: "Image upload failed" });
       }
 
-      thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
+      // thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
+      thumbnailUrl = `http://localhost:5000/api/v1/blog/images/${fileName}`;
     }
 
     // file uploads end   .........
@@ -176,7 +198,11 @@ export const deleteBlog = async (req: Request, res: Response) => {
     // }
 
     if (blog.thumbnailUrl) {
-      const filePath = blog.thumbnailUrl.replace(`${GARAGE_PUBLIC_URL}/`, "");
+      //const filePath = blog.thumbnailUrl.replace(`${GARAGE_PUBLIC_URL}/`, "");
+      const filePath = blog.thumbnailUrl.replace(
+        "http://localhost:5000/api/v1/blog/images/",
+        "",
+      );
       if (filePath) {
         try {
           await garageClient.send(
@@ -274,8 +300,13 @@ export const updateBlog = async (req: Request, res: Response) => {
 
     if (req.file) {
       if (blog.thumbnailUrl) {
+        // const oldFilePath = blog.thumbnailUrl.replace(
+        //   `${GARAGE_PUBLIC_URL}/`,
+        //   "",
+        // );
+
         const oldFilePath = blog.thumbnailUrl.replace(
-          `${GARAGE_PUBLIC_URL}/`,
+          "http://localhost:5000/api/v1/blog/images/",
           "",
         );
 
@@ -313,7 +344,9 @@ export const updateBlog = async (req: Request, res: Response) => {
           .json({ success: false, message: "Image upload failed" });
       }
 
-      thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
+      //thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
+
+      thumbnailUrl = `http://localhost:5000/api/v1/blog/images/${fileName}`;
 
       //file upload end ....
     }

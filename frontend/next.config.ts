@@ -11,8 +11,8 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        port: "3900",
-        pathname: "/blog-thumbnails/**",
+        port: "5000",
+        pathname: "/api/v1/blog/images/**",
       },
     ],
     unoptimized: true,
