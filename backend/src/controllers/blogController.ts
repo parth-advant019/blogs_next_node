@@ -98,7 +98,7 @@ export const addBlog = async (req: Request, res: Response) => {
       }
 
       // thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
-      thumbnailUrl = `http://localhost:5000/api/v1/blog/images/${fileName}`;
+      thumbnailUrl = blogImageUrl(fileName);
     }
 
     // file uploads end   .........
@@ -212,10 +212,7 @@ export const deleteBlog = async (req: Request, res: Response) => {
 
     if (blog.thumbnailUrl) {
       //const filePath = blog.thumbnailUrl.replace(`${GARAGE_PUBLIC_URL}/`, "");
-      const filePath = blog.thumbnailUrl.replace(
-        "http://localhost:5000/api/v1/blog/images/",
-        "",
-      );
+      const filePath = blogImageKeyFromUrl(blog.thumbnailUrl);
       if (filePath) {
         try {
           await garageClient.send(
@@ -318,10 +315,7 @@ export const updateBlog = async (req: Request, res: Response) => {
         //   "",
         // );
 
-        const oldFilePath = blog.thumbnailUrl.replace(
-          "http://localhost:5000/api/v1/blog/images/",
-          "",
-        );
+        const oldFilePath = blogImageKeyFromUrl(blog.thumbnailUrl);
 
         if (oldFilePath) {
           try {
@@ -359,7 +353,7 @@ export const updateBlog = async (req: Request, res: Response) => {
 
       //thumbnailUrl = `${GARAGE_PUBLIC_URL}/${fileName}`;
 
-      thumbnailUrl = `http://localhost:5000/api/v1/blog/images/${fileName}`;
+      thumbnailUrl = blogImageUrl(fileName);
 
       //file upload end ....
     }
