@@ -17,6 +17,17 @@ import {
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 //import { success } from "zod";
 
+const API_PUBLIC_URL =
+  process.env.API_PUBLIC_URL || "http://localhost:5000";
+
+function blogImageUrl(fileName: string): string {
+  return `${API_PUBLIC_URL}/api/v1/blog/images/${fileName}`;
+}
+
+function blogImageKeyFromUrl(url: string): string {
+  return url.replace(`${API_PUBLIC_URL}/api/v1/blog/images/`, "");
+}
+
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 
 export const getImage = async (req: Request, res: Response) => {
