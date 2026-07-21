@@ -42,7 +42,7 @@ export default function SideBar() {
         className={`w-64 h-screen bg-indigo-600 text-white fixed left-0 top-0 p-4 pt-14 md:pt-4 transition-all duration-300 z-50 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Blogs web app</h2>
+          <h2 className="text-xl font-bold">Blogs web app first</h2>
         </div>
 
         <nav className="mt-6 flex flex-col justify-between h-[85%]">
